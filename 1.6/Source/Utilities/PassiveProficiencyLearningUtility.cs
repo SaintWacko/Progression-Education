@@ -28,6 +28,8 @@ public static class PassiveProficiencyLearningUtility
 
     private static readonly Dictionary<PassiveLearningThrottleKey, int> lastGainByObserverAndSource = new();
     private static readonly List<PassiveLearningThrottleKey> cleanupBuffer = new();
+    private static readonly List<ProficiencyDef> cachedSpeechTracks = new();
+    private static int cachedSpeechTracksForDefCount = -1;
     private static int nextCleanupTick;
 
     public static void NotifyWeaponUse(Pawn sourcePawn, Thing weapon)
@@ -55,26 +57,11 @@ public static class PassiveProficiencyLearningUtility
             return;
         }
 
-        foreach (var track in DefDatabase<ProficiencyDef>.AllDefsListForReading)
+        var speechTracks = GetSpeechTracks();
+        for (var trackIndex = 0; trackIndex < speechTracks.Count; trackIndex++)
         {
-            if (!ProficiencyUtility.IsTrackEnabled(track)
-                || track.passiveSources == null
-                || track.passiveSources.Count == 0)
-            {
-                continue;
-            }
-
-            var hasSpeechSource = false;
-            for (var i = 0; i < track.passiveSources.Count; i++)
-            {
-                if (track.passiveSources[i]?.trigger == PassiveProficiencyTrigger.Speech)
-                {
-                    hasSpeechSource = true;
-                    break;
-                }
-            }
-
-            if (!hasSpeechSource)
+            var track = speechTracks[trackIndex];
+            if (!ProficiencyUtility.IsTrackEnabled(track))
             {
                 continue;
             }
@@ -133,6 +120,7 @@ public static class PassiveProficiencyLearningUtility
             }
 
             var targetTierIndex = track.tiers.IndexOf(passiveSource.targetTier);
+            // Tier index 0 is the baseline tier and should not be passively "promoted into".
             if (targetTierIndex <= 0)
             {
                 continue;
@@ -151,7 +139,7 @@ public static class PassiveProficiencyLearningUtility
 
             var radius = passiveSource.radius > 0f
                 ? passiveSource.radius
-                : Mathf.Max(1f, EducationMod.settings.passiveLearningRadius);
+                : Mathf.Max(EducationSettings.MinPassiveLearningRadius, EducationMod.settings.passiveLearningRadius);
             var radiusSq = radius * radius;
             var baseGain = passiveSource.gainAmount > 0f
                 ? passiveSource.gainAmount
@@ -165,7 +153,7 @@ public static class PassiveProficiencyLearningUtility
 
             var cooldownTicks = passiveSource.cooldownTicks >= 0
                 ? passiveSource.cooldownTicks
-                : Mathf.Max(0, EducationMod.settings.passiveLearningCooldownTicks);
+                : EducationMod.settings.passiveLearningCooldownTicks;
 
             for (var i = 0; i < allPawns.Count; i++)
             {
@@ -187,8 +175,7 @@ public static class PassiveProficiencyLearningUtility
                 var observerTierIndex = observerTier != null ? track.tiers.IndexOf(observerTier) : -1;
                 if (observerTierIndex < minLearnerIdx
                     || observerTierIndex > maxLearnerIdx
-                    || observerTierIndex >= targetTierIndex
-                    || ProficiencyUtility.MeetsOrExceedsTier(observer, track, passiveSource.targetTier))
+                    || observerTierIndex >= targetTierIndex)
                 {
                     continue;
                 }
@@ -217,6 +204,7 @@ public static class PassiveProficiencyLearningUtility
                     continue;
                 }
 
+                // Semester goals must be positive to avoid divide-by-zero style progression behavior.
                 var goal = Mathf.Max(1f, passiveSource.targetTier.semesterGoal);
                 var progress = EducationManager.Instance.AddProficiencyClassProgress(observer, track, passiveSource.targetTier, gain, goal);
                 if (progress >= goal)
@@ -231,6 +219,37 @@ public static class PassiveProficiencyLearningUtility
                 }
             }
         }
+    }
+
+    private static List<ProficiencyDef> GetSpeechTracks()
+    {
+        var allDefs = DefDatabase<ProficiencyDef>.AllDefsListForReading;
+        if (cachedSpeechTracksForDefCount == allDefs.Count)
+        {
+            return cachedSpeechTracks;
+        }
+
+        cachedSpeechTracks.Clear();
+        for (var i = 0; i < allDefs.Count; i++)
+        {
+            var track = allDefs[i];
+            if (track.passiveSources == null || track.passiveSources.Count == 0)
+            {
+                continue;
+            }
+
+            for (var j = 0; j < track.passiveSources.Count; j++)
+            {
+                if (track.passiveSources[j]?.trigger == PassiveProficiencyTrigger.Speech)
+                {
+                    cachedSpeechTracks.Add(track);
+                    break;
+                }
+            }
+        }
+
+        cachedSpeechTracksForDefCount = allDefs.Count;
+        return cachedSpeechTracks;
     }
 
     private static void TryCleanupThrottle(int currentTick)

@@ -5,6 +5,7 @@ namespace ProgressionEducation;
 
 public class EducationSettings : ModSettings
 {
+    public const float MinPassiveLearningRadius = 1f;
     private const float MaxPassiveCooldownTicks = 12000f;
 
     public float daycareClassesLearningSpeedModifier = 1f;
@@ -64,7 +65,7 @@ public class EducationSettings : ModSettings
         listing.Label("PE_PassiveLearningRadius".Translate()
                       + ": "
                       + passiveLearningRadius.ToString("F1"));
-        passiveLearningRadius = listing.Slider(passiveLearningRadius, 1f, 40f);
+        passiveLearningRadius = listing.Slider(passiveLearningRadius, MinPassiveLearningRadius, 40f);
         listing.Label("PE_PassiveWeaponGainPerEvent".Translate()
                       + ": "
                       + passiveWeaponGainPerEvent.ToString("F1"));
