@@ -5,6 +5,8 @@ namespace ProgressionEducation;
 
 public class EducationSettings : ModSettings
 {
+    private const float MaxPassiveCooldownTicks = 12000f;
+
     public float daycareClassesLearningSpeedModifier = 1f;
     public bool debugMode;
     public bool enableProficiencySystem = true;
@@ -74,7 +76,7 @@ public class EducationSettings : ModSettings
         listing.Label("PE_PassiveLearningCooldownSeconds".Translate()
                       + ": "
                       + (passiveLearningCooldownTicks / 60f).ToString("F1"));
-        passiveLearningCooldownTicks = Mathf.RoundToInt(listing.Slider(passiveLearningCooldownTicks, 0f, 12000f));
+        passiveLearningCooldownTicks = Mathf.RoundToInt(listing.Slider(passiveLearningCooldownTicks, 0f, MaxPassiveCooldownTicks));
         listing.Gap();
         listing.CheckboxLabeled("PE_EnableDebugMode".Translate(), ref debugMode);
         listing.End();

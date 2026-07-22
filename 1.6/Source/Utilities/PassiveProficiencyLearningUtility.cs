@@ -7,6 +7,9 @@ namespace ProgressionEducation;
 
 public static class PassiveProficiencyLearningUtility
 {
+    private const int CleanupIntervalTicks = 60000;
+    private const int ThrottleExpiryTicks = 120000;
+
     private readonly struct PassiveLearningThrottleKey
     {
         public readonly int observerId;
@@ -237,7 +240,7 @@ public static class PassiveProficiencyLearningUtility
             return;
         }
 
-        nextCleanupTick = currentTick + 60000;
+        nextCleanupTick = currentTick + CleanupIntervalTicks;
         if (lastGainByObserverAndSource.Count == 0)
         {
             return;
@@ -246,7 +249,7 @@ public static class PassiveProficiencyLearningUtility
         cleanupBuffer.Clear();
         foreach (var pair in lastGainByObserverAndSource)
         {
-            if (currentTick - pair.Value > 120000)
+            if (currentTick - pair.Value > ThrottleExpiryTicks)
             {
                 cleanupBuffer.Add(pair.Key);
             }
