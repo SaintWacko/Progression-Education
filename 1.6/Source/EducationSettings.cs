@@ -16,6 +16,10 @@ public class EducationSettings : ModSettings
     public bool enableWeaponProficiency = true;
     public bool enableVehicleProficiency = true;
     public bool enableSpeechProficiency = true;
+    public float passiveLearningRadius = 12f;
+    public float passiveWeaponGainPerEvent = 6f;
+    public float passiveSpeechGainPerEvent = 4f;
+    public int passiveLearningCooldownTicks = 2500;
 
     public void DoSettingsWindowContents(Rect inRect)
     {
@@ -54,6 +58,23 @@ public class EducationSettings : ModSettings
         listing.CheckboxLabeled("PE_EnableWeaponProficiency".Translate(), ref enableWeaponProficiency);
         listing.CheckboxLabeled("PE_EnableVehicleProficiency".Translate(), ref enableVehicleProficiency);
         listing.CheckboxLabeled("PE_EnableSpeechProficiency".Translate(), ref enableSpeechProficiency);
+        listing.GapLine();
+        listing.Label("PE_PassiveLearningRadius".Translate()
+                      + ": "
+                      + passiveLearningRadius.ToString("F1"));
+        passiveLearningRadius = listing.Slider(passiveLearningRadius, 1f, 40f);
+        listing.Label("PE_PassiveWeaponGainPerEvent".Translate()
+                      + ": "
+                      + passiveWeaponGainPerEvent.ToString("F1"));
+        passiveWeaponGainPerEvent = listing.Slider(passiveWeaponGainPerEvent, 0f, 50f);
+        listing.Label("PE_PassiveSpeechGainPerEvent".Translate()
+                      + ": "
+                      + passiveSpeechGainPerEvent.ToString("F1"));
+        passiveSpeechGainPerEvent = listing.Slider(passiveSpeechGainPerEvent, 0f, 50f);
+        listing.Label("PE_PassiveLearningCooldownSeconds".Translate()
+                      + ": "
+                      + (passiveLearningCooldownTicks / 60f).ToString("F1"));
+        passiveLearningCooldownTicks = Mathf.RoundToInt(listing.Slider(passiveLearningCooldownTicks, 0f, 12000f));
         listing.Gap();
         listing.CheckboxLabeled("PE_EnableDebugMode".Translate(), ref debugMode);
         listing.End();
@@ -78,5 +99,9 @@ public class EducationSettings : ModSettings
         Scribe_Values.Look(ref enableWeaponProficiency, "enableWeaponProficiency", true);
         Scribe_Values.Look(ref enableVehicleProficiency, "enableVehicleProficiency", true);
         Scribe_Values.Look(ref enableSpeechProficiency, "enableSpeechProficiency", true);
+        Scribe_Values.Look(ref passiveLearningRadius, "passiveLearningRadius", 12f);
+        Scribe_Values.Look(ref passiveWeaponGainPerEvent, "passiveWeaponGainPerEvent", 6f);
+        Scribe_Values.Look(ref passiveSpeechGainPerEvent, "passiveSpeechGainPerEvent", 4f);
+        Scribe_Values.Look(ref passiveLearningCooldownTicks, "passiveLearningCooldownTicks", 2500);
     }
 }

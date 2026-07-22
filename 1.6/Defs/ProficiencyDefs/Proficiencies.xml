@@ -9,6 +9,22 @@
       <li>PE_FirearmTier</li>
       <li>PE_HighTechTier</li>
     </tiers>
+    <passiveSources>
+      <li>
+        <trigger>WeaponUse</trigger>
+        <targetTier>PE_FirearmTier</targetTier>
+        <minimumSourceTier>PE_FirearmTier</minimumSourceTier>
+        <minimumLearnerTier>PE_LowTechTier</minimumLearnerTier>
+        <maximumLearnerTier>PE_LowTechTier</maximumLearnerTier>
+      </li>
+      <li>
+        <trigger>WeaponUse</trigger>
+        <targetTier>PE_HighTechTier</targetTier>
+        <minimumSourceTier>PE_HighTechTier</minimumSourceTier>
+        <minimumLearnerTier>PE_FirearmTier</minimumLearnerTier>
+        <maximumLearnerTier>PE_FirearmTier</maximumLearnerTier>
+      </li>
+    </passiveSources>
   </ProgressionEducation.ProficiencyDef>
 
   <ProgressionEducation.ProficiencyDef>
@@ -30,6 +46,22 @@
       <li>PE_BasicSpeechTier</li>
       <li>PE_FluentSpeechTier</li>
     </tiers>
+    <passiveSources>
+      <li>
+        <trigger>Speech</trigger>
+        <targetTier>PE_BasicSpeechTier</targetTier>
+        <minimumSourceTier>PE_BasicSpeechTier</minimumSourceTier>
+        <minimumLearnerTier>PE_MuteTier</minimumLearnerTier>
+        <maximumLearnerTier>PE_MuteTier</maximumLearnerTier>
+      </li>
+      <li>
+        <trigger>Speech</trigger>
+        <targetTier>PE_FluentSpeechTier</targetTier>
+        <minimumSourceTier>PE_FluentSpeechTier</minimumSourceTier>
+        <minimumLearnerTier>PE_BasicSpeechTier</minimumLearnerTier>
+        <maximumLearnerTier>PE_BasicSpeechTier</maximumLearnerTier>
+      </li>
+    </passiveSources>
   </ProgressionEducation.ProficiencyDef>
 
   <ProgressionEducation.ProficiencyTierDef>

@@ -7,5 +7,6 @@ namespace ProgressionEducation
     public class ProficiencyDef : Def
     {
         public List<ProficiencyTierDef> tiers = new();
+        public List<PassiveProficiencySource> passiveSources = new();
     }
 }

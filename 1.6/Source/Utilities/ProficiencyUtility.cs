@@ -135,56 +135,22 @@ public static class ProficiencyUtility
             return true;
         }
 
-        var proficiencyRequirement = equipment.def.GetModExtension<ItemProficiencyRequirement>();
-        TraitDef requiredProficiency = null;
-        bool isDefaultFallback = false;
-
-        if (proficiencyRequirement == null || proficiencyRequirement.requiredProficiency == null)
-        {
-            isDefaultFallback = true;
-            var techLevel = GetTechLevelFor(equipment.def);
-            foreach (var tier in DefsOf.PE_WeaponTrack.tiers)
-            {
-                if (tier.generationTechLevel != TechLevel.Undefined && techLevel <= tier.generationTechLevel)
-                {
-                    requiredProficiency = tier.traitDef;
-                    break;
-                }
-            }
-            if (requiredProficiency == null)
-            {
-                requiredProficiency = DefsOf.PE_WeaponTrack.tiers.Last().traitDef;
-            }
-        }
-        else
-        {
-            requiredProficiency = proficiencyRequirement.requiredProficiency;
-        }
-
-        if (requiredProficiency != null)
+        if (TryGetRequiredProficiencyTier(equipment, out var requiredTrack, out var requiredTier, out var isDefaultFallback))
         {
             if (isDefaultFallback && equipment is Apparel)
             {
-                if (requiredProficiency != DefsOf.PE_HighTechProficiency)
+                if (requiredTier?.traitDef != DefsOf.PE_HighTechProficiency)
                 {
                     return true;
                 }
             }
 
-            ProficiencyTierDef requiredTier = null;
-            ProficiencyDef requiredTrack = null;
-            foreach (var track in DefDatabase<ProficiencyDef>.AllDefsListForReading)
-            {
-                if (!IsTrackEnabled(track)) continue;
-                requiredTier = track.tiers.FirstOrDefault(t => t.traitDef == requiredProficiency);
-                if (requiredTier != null)
-                {
-                    requiredTrack = track;
-                    break;
-                }
-            }
             if (requiredTrack != null)
             {
+                if (!IsTrackEnabled(requiredTrack))
+                {
+                    return true;
+                }
                 return MeetsOrExceedsTier(pawn, requiredTrack, requiredTier);
             }
         }
@@ -194,15 +160,69 @@ public static class ProficiencyUtility
 
     public static string GetProficiencyLevelString(ThingDef thingDef)
     {
-        var techLevel = GetTechLevelFor(thingDef);
-        foreach (var tier in DefsOf.PE_WeaponTrack.tiers)
+        if (TryGetRequiredProficiencyTier(thingDef, out _, out var requiredTier))
         {
-            if (tier.generationTechLevel != TechLevel.Undefined && techLevel <= tier.generationTechLevel)
-            {
-                return tier.label;
-            }
+            return requiredTier.label;
         }
-        return DefsOf.PE_WeaponTrack.tiers.Last().label;
+        return DefsOf.PE_WeaponTrack.tiers.LastOrDefault()?.label ?? "";
+    }
+
+    public static bool TryGetRequiredProficiencyTier(Thing equipment, out ProficiencyDef requiredTrack, out ProficiencyTierDef requiredTier, out bool isDefaultFallback)
+    {
+        requiredTrack = null;
+        requiredTier = null;
+        isDefaultFallback = false;
+        if (equipment?.def == null)
+        {
+            return false;
+        }
+
+        return TryGetRequiredProficiencyTier(equipment.def, out requiredTrack, out requiredTier, out isDefaultFallback);
+    }
+
+    public static bool TryGetRequiredProficiencyTier(ThingDef thingDef, out ProficiencyDef requiredTrack, out ProficiencyTierDef requiredTier)
+    {
+        return TryGetRequiredProficiencyTier(thingDef, out requiredTrack, out requiredTier, out _);
+    }
+
+    public static bool TryGetRequiredProficiencyTier(ThingDef thingDef, out ProficiencyDef requiredTrack, out ProficiencyTierDef requiredTier, out bool isDefaultFallback)
+    {
+        requiredTrack = null;
+        requiredTier = null;
+        isDefaultFallback = false;
+        if (thingDef == null)
+        {
+            return false;
+        }
+
+        var proficiencyRequirement = thingDef.GetModExtension<ItemProficiencyRequirement>();
+        TraitDef requiredProficiency;
+        if (proficiencyRequirement == null || proficiencyRequirement.requiredProficiency == null)
+        {
+            isDefaultFallback = true;
+            var techLevel = GetTechLevelFor(thingDef);
+            requiredTier = DefsOf.PE_WeaponTrack.tiers.FirstOrDefault(t => t.generationTechLevel != TechLevel.Undefined && techLevel <= t.generationTechLevel)
+                           ?? DefsOf.PE_WeaponTrack.tiers.LastOrDefault();
+            requiredTrack = DefsOf.PE_WeaponTrack;
+            return requiredTier != null;
+        }
+
+        requiredProficiency = proficiencyRequirement.requiredProficiency;
+        foreach (var track in DefDatabase<ProficiencyDef>.AllDefsListForReading)
+        {
+            requiredTier = track.tiers.FirstOrDefault(t => t.traitDef == requiredProficiency);
+            if (requiredTier == null)
+            {
+                continue;
+            }
+
+            requiredTrack = track;
+            return true;
+        }
+
+        requiredTier = null;
+        requiredTrack = null;
+        return false;
     }
 
     public static TechLevel GetTechLevelFor(ThingDef thingDef)

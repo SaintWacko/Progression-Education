@@ -153,6 +153,10 @@
   <PE_EnableWeaponProficiency>Enable weapon proficiency</PE_EnableWeaponProficiency>
   <PE_EnableVehicleProficiency>Enable vehicle proficiency</PE_EnableVehicleProficiency>
   <PE_EnableSpeechProficiency>Enable speech proficiency</PE_EnableSpeechProficiency>
+  <PE_PassiveLearningRadius>Passive learning radius</PE_PassiveLearningRadius>
+  <PE_PassiveWeaponGainPerEvent>Passive weapon gain per observed use</PE_PassiveWeaponGainPerEvent>
+  <PE_PassiveSpeechGainPerEvent>Passive speech gain per observed conversation</PE_PassiveSpeechGainPerEvent>
+  <PE_PassiveLearningCooldownSeconds>Passive learning cooldown (seconds)</PE_PassiveLearningCooldownSeconds>
   <PE_GiddyUpNeedRiding>Colonist must be taught animal riding proficiency.</PE_GiddyUpNeedRiding>
   <PE_VehicleProficiencyRequired>Requires {0} proficiency</PE_VehicleProficiencyRequired>
   <PE_RequiredProficiencyStat>Required proficiency</PE_RequiredProficiencyStat>
